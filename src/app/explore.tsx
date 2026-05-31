@@ -1,1187 +1,607 @@
-import React, { useState, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  StatusBar, 
-  TouchableOpacity, 
-  StyleSheet, 
-  TextInput, 
-  Switch,
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+  StyleSheet,
   Dimensions,
-  Animated,
-  ActivityIndicator,
-  FlatList
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useVoiceStore } from "../store/voiceStore";
-import { jupyterVoice } from "../services/VoiceAssistantService";
 import { COLORS } from "../theme/colors";
+import { ModernCard } from "../components/modern/ModernCard";
+import { ModernButton } from "../components/modern/ModernButton";
+import { GlassInput } from "../components/modern/GlassInput";
+import { CalendarWidget } from "../components/modern/CalendarWidget";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// ============================================================================
-// MODERN TAB NAVIGATION COMPONENT
-// ============================================================================
-const TabNavigation = ({ activeTab, onTabChange }) => {
-  const tabs = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
-    { id: "tools", label: "Herramientas", icon: "🛠️" },
-    { id: "automations", label: "Automatizaciones", icon: "⚙️" },
-    { id: "settings", label: "Configuración", icon: "⚙️" },
-  ];
+type TabType = "dashboard" | "tools" | "calendar" | "settings";
 
-  return (
-    <View style={styles.tabNavigation}>
-      {tabs.map((tab) => (
-        <TouchableOpacity
-          key={tab.id}
-          onPress={() => onTabChange(tab.id)}
-          style={[
-            styles.tabButton,
-            activeTab === tab.id && styles.tabButtonActive
-          ]}
-        >
-          <Text style={styles.tabIcon}>{tab.icon}</Text>
-          <Text style={[
-            styles.tabLabel,
-            activeTab === tab.id && styles.tabLabelActive
-          ]}>
-            {tab.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-};
+const TOOLS = [
+  {
+    id: "chat",
+    title: "Chat Inteligente",
+    icon: "💬",
+    description: "Conversación en tiempo real",
+    color: COLORS.primary,
+  },
+  {
+    id: "search",
+    title: "Búsqueda Avanzada",
+    icon: "🔍",
+    description: "Busca información al instante",
+    color: COLORS.secondary,
+  },
+  {
+    id: "code",
+    title: "Code Studio",
+    icon: "💻",
+    description: "Escribe y depura código",
+    color: COLORS.accent,
+  },
+  {
+    id: "voice",
+    title: "Voice Studio",
+    icon: "🎙️",
+    description: "Personaliza tu voz",
+    color: COLORS.blue,
+  },
+  {
+    id: "automation",
+    title: "Automatización",
+    icon: "⚙️",
+    description: "Crea flujos automáticos",
+    color: COLORS.purple,
+  },
+  {
+    id: "analyze",
+    title: "Análisis",
+    icon: "📊",
+    description: "Visualiza datos",
+    color: COLORS.green,
+  },
+];
 
-// ============================================================================
-// MODERN TOOL CARD COMPONENT
-// ============================================================================
-const ToolCard = ({ icon, title, description, onPress, isActive }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={[styles.toolCardBase, isActive && styles.toolCardActive]}
-  >
-    <View style={styles.toolCardContent}>
-      <Text style={styles.toolCardIcon}>{icon}</Text>
-      <Text style={styles.toolCardTitle}>{title}</Text>
-      <Text style={styles.toolCardDesc}>{description}</Text>
-    </View>
-    <View style={styles.toolCardArrow}>
-      <Text style={styles.arrowText}>→</Text>
-    </View>
-  </TouchableOpacity>
-);
+export default function ExploreScreen() {
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
 
-// ============================================================================
-// DASHBOARD VIEW
-// ============================================================================
-const DashboardView = ({ onSelectTool }) => {
-  const tools = [
-    { id: "chat", icon: "💬", title: "Chat IA", description: "Conversación inteligente con Jupyter" },
-    { id: "search", icon: "🔍", title: "Búsqueda", description: "Búsqueda profunda con IA" },
-    { id: "code", icon: "💻", title: "Code Studio", description: "Generación de código" },
-    { id: "screen", icon: "📱", title: "Screen Analysis", description: "Análisis de pantalla" },
-    { id: "voice", icon: "🎙️", title: "Voice Studio", description: "Personalización de voz" },
-    { id: "memory", icon: "🧠", title: "Memory", description: "Gestiona tu perfil" },
-  ];
-
-  return (
-    <ScrollView style={styles.dashboardView} showsVerticalScrollIndicator={false}>
-      {/* HERO SECTION */}
-      <View style={styles.heroSection}>
-        <Text style={styles.heroTitle}>Jupyter IA</Text>
-        <Text style={styles.heroSubtitle}>Tu asistente inteligente de voz</Text>
+  // Dashboard View
+  const renderDashboard = () => (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Explorador</Text>
+        <Text style={styles.headerSubtitle}>Acceso a todas tus herramientas</Text>
       </View>
 
-      {/* QUICK STATS */}
+      {/* Quick Stats */}
       <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>12</Text>
-          <Text style={styles.statLabel}>Conversaciones</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>8</Text>
-          <Text style={styles.statLabel}>Automatizaciones</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>48h</Text>
-          <Text style={styles.statLabel}>Tiempo ahorrado</Text>
-        </View>
+        <ModernCard glassy style={styles.statCard}>
+          <Text style={styles.statValue}>12</Text>
+          <Text style={styles.statLabel}>Herramientas</Text>
+        </ModernCard>
+        <ModernCard glassy style={styles.statCard}>
+          <Text style={styles.statValue}>5</Text>
+          <Text style={styles.statLabel}>Activas</Text>
+        </ModernCard>
+        <ModernCard glassy style={styles.statCard}>
+          <Text style={styles.statValue}>∞</Text>
+          <Text style={styles.statLabel}>Posibilidades</Text>
+        </ModernCard>
       </View>
 
-      {/* TOOLS GRID */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Herramientas principales</Text>
-        <View style={styles.toolsGridLayout}>
-          {tools.map((tool) => (
-            <View key={tool.id} style={{ width: "48%" }}>
-              <ToolCard
-                icon={tool.icon}
-                title={tool.title}
-                description={tool.description}
-                onPress={() => onSelectTool(tool.id)}
-              />
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* RECENT ACTIVITY */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Actividad reciente</Text>
-        <View style={styles.activityList}>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.activityText}>Chat sobre estructura de proyecto</Text>
-              <Text style={styles.activityTime}>Hace 2 horas</Text>
-            </View>
-          </View>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.activityText}>Generó 3 snippets de código</Text>
-              <Text style={styles.activityTime}>Hace 5 horas</Text>
-            </View>
-          </View>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.activityText}>Ejecutó análisis de pantalla</Text>
-              <Text style={styles.activityTime}>Ayer</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    </ScrollView>
-  );
-};
-
-// ============================================================================
-// TOOLS VIEW - CHAT
-// ============================================================================
-const ChatToolView = ({ chatThreads, activeThread, setActiveThread, chatInput, setChatInput, handleSendChatMessage }) => {
-  const currentThread = chatThreads.find(t => t.id === activeThread);
-
-  return (
-    <View style={styles.toolView}>
-      {/* SIDEBAR - THREAD LIST */}
-      <View style={styles.chatSidebar}>
-        <Text style={styles.sidebarHeader}>HILOS</Text>
-        {chatThreads.map((thread) => (
-          <TouchableOpacity
-            key={thread.id}
-            onPress={() => setActiveThread(thread.id)}
-            style={[
-              styles.threadItem,
-              activeThread === thread.id && styles.threadItemActive
-            ]}
-          >
-            <Text style={styles.threadText} numberOfLines={1}>
-              {thread.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* MAIN CHAT AREA */}
-      <View style={styles.chatMain}>
-        <ScrollView style={styles.messagesList}>
-          {currentThread?.messages.map((msg, idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.messageBubble,
-                msg.role === "user" ? styles.msgUser : styles.msgAssistant
-              ]}
-            >
-              <Text style={styles.messageText}>{msg.content}</Text>
-            </View>
-          ))}
-        </ScrollView>
-
-        {/* INPUT ROW */}
-        <View style={styles.chatInputRow}>
-          <TextInput
-            style={styles.chatInput}
-            placeholder="Escribe tu pregunta..."
-            placeholderTextColor={COLORS.textMuted}
-            value={chatInput}
-            onChangeText={setChatInput}
-            multiline
-          />
-          <TouchableOpacity
-            onPress={handleSendChatMessage}
-            style={styles.chatSendBtn}
-          >
-            <Text style={styles.chatSendIcon}>➤</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// ============================================================================
-// TOOLS VIEW - SEARCH
-// ============================================================================
-const SearchToolView = ({ searchQuery, setSearchQuery, handleAISearch, searchResults, searching }) => {
-  return (
-    <ScrollView style={styles.toolView} showsVerticalScrollIndicator={false}>
-      {/* SEARCH INPUT */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchInputRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Busca cualquier cosa con IA..."
-            placeholderTextColor={COLORS.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <TouchableOpacity
-            onPress={handleAISearch}
-            style={styles.searchButton}
-          >
-            <Text style={styles.searchButtonText}>🔍</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* RESULTS */}
-      {searching && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator color={COLORS.cyan} size="large" />
-          <Text style={styles.loadingText}>Buscando...</Text>
-        </View>
-      )}
-
-      {searchResults && !searching && (
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultSummaryTitle}>RESUMEN</Text>
-          <Text style={styles.resultSummaryText}>{searchResults.summary}</Text>
-
-          <Text style={styles.sourcesHeader}>FUENTES</Text>
-          {searchResults.sources.map((source) => (
-            <View key={source.id} style={styles.sourceCard}>
-              <Text style={styles.sourceName}>{source.name}</Text>
-              <Text style={styles.sourceUrl}>{source.url}</Text>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {!searchResults && !searching && (
-        <View style={styles.emptyStateContainer}>
-          <Text style={styles.emptyStateIcon}>🔍</Text>
-          <Text style={styles.emptyStateText}>Realiza una búsqueda para ver resultados</Text>
-        </View>
-      )}
-    </ScrollView>
-  );
-};
-
-// ============================================================================
-// TOOLS VIEW - CODE STUDIO
-// ============================================================================
-const CodeToolView = ({ selectedAgent, setSelectedAgent, codingPrompt, setCodingPrompt, generatedCode, coding, onGenerateCode }) => {
-  const agents = [
-    { id: "coder", label: "Coder", icon: "👨‍💻" },
-    { id: "reviewer", label: "Reviewer", icon: "👀" },
-    { id: "architect", label: "Architect", icon: "🏗️" },
-  ];
-
-  return (
-    <ScrollView style={styles.toolView} showsVerticalScrollIndicator={false}>
-      {/* AGENT SELECTOR */}
-      <View style={styles.agentSection}>
-        <Text style={styles.sectionTitle}>Selecciona un agente</Text>
-        <View style={styles.agentGrid}>
-          {agents.map((agent) => (
-            <TouchableOpacity
-              key={agent.id}
-              onPress={() => setSelectedAgent(agent.id)}
-              style={[
-                styles.agentCard,
-                selectedAgent === agent.id && styles.agentCardActive
-              ]}
-            >
-              <Text style={styles.agentIcon}>{agent.icon}</Text>
-              <Text style={styles.agentLabel}>{agent.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      {/* INPUT SECTION */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Tu solicitud</Text>
-        <TextInput
-          style={styles.codePromptInput}
-          placeholder="Describe lo que necesitas..."
-          placeholderTextColor={COLORS.textMuted}
-          value={codingPrompt}
-          onChangeText={setCodingPrompt}
-          multiline
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <GlassInput
+          placeholder="Busca una herramienta..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
-        <TouchableOpacity
-          onPress={onGenerateCode}
-          style={[styles.generateBtn, coding && styles.generateBtnDisabled]}
-          disabled={coding}
-        >
-          {coding ? (
-            <ActivityIndicator color={COLORS.background} />
-          ) : (
-            <Text style={styles.generateBtnText}>Generar Código</Text>
-          )}
-        </TouchableOpacity>
       </View>
 
-      {/* OUTPUT SECTION */}
-      {generatedCode && (
-        <View style={styles.codeOutputSection}>
-          <Text style={styles.sectionTitle}>Código generado</Text>
-          <View style={styles.codeBlock}>
-            <Text style={styles.codeText}>{generatedCode}</Text>
-          </View>
-        </View>
-      )}
-    </ScrollView>
-  );
-};
-
-// ============================================================================
-// TOOLS VIEW - VOICE STUDIO
-// ============================================================================
-const VoiceToolView = ({ wakeWordEnabled, setWakeWordEnabled, micSensitivity, setMicSensitivity, availableVoices, selectedVoice, setSelectedVoice }) => {
-  return (
-    <ScrollView style={styles.toolView} showsVerticalScrollIndicator={false}>
-      {/* VOICE SELECTION */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Selecciona una voz</Text>
-        {availableVoices.map((voice) => (
-          <TouchableOpacity
-            key={voice.id}
-            onPress={() => setSelectedVoice(voice.id)}
-            style={[
-              styles.voiceOption,
-              selectedVoice === voice.id && styles.voiceOptionActive
-            ]}
-          >
-            <View>
-              <Text style={styles.voiceOptionName}>{voice.name}</Text>
-              <Text style={styles.voiceOptionLang}>{voice.language}</Text>
-            </View>
-            {selectedVoice === voice.id && (
-              <Text style={styles.voiceCheckmark}>✓</Text>
-            )}
+      {/* Featured Tools Grid */}
+      <Text style={styles.sectionTitle}>Herramientas Principales</Text>
+      <View style={styles.toolsGrid}>
+        {TOOLS.slice(0, 3).map((tool) => (
+          <TouchableOpacity key={tool.id} activeOpacity={0.7}>
+            <ModernCard glassy elevated style={[styles.toolCard, { borderTopWidth: 2 } as any, { borderTopColor: tool.color }]}>
+              <Text style={styles.toolIcon}>{tool.icon}</Text>
+              <Text style={styles.toolTitle}>{tool.title}</Text>
+              <Text style={styles.toolDesc}>{tool.description}</Text>
+            </ModernCard>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* SETTINGS */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Configuración</Text>
+      {/* Calendar Widget */}
+      <CalendarWidget maxEvents={3} />
 
-        {/* WAKE WORD */}
+      {/* All Tools Grid */}
+      <Text style={styles.sectionTitle}>Todas las Herramientas</Text>
+      <View style={styles.allToolsGrid}>
+        {TOOLS.map((tool) => (
+          <TouchableOpacity key={tool.id} style={styles.toolItemContainer} activeOpacity={0.7}>
+            <View style={[styles.toolItem, { backgroundColor: tool.color + "15" }]}>
+              <Text style={styles.toolItemIcon}>{tool.icon}</Text>
+              <Text style={styles.toolItemTitle}>{tool.title}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
+  );
+
+  // Tools View
+  const renderTools = () => (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Herramientas</Text>
+        <Text style={styles.headerSubtitle}>Explora cada característica</Text>
+      </View>
+
+      <View style={styles.searchContainer}>
+        <GlassInput
+          placeholder="Filtrar herramientas..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
+      <View style={styles.detailedToolsList}>
+        {TOOLS.map((tool) => (
+          <TouchableOpacity key={tool.id} activeOpacity={0.7}>
+            <ModernCard glassy elevated style={styles.detailedToolCard}>
+              <View style={styles.detailedToolContent}>
+                <Text style={styles.detailedToolIcon}>{tool.icon}</Text>
+                <View style={styles.detailedToolInfo}>
+                  <Text style={styles.detailedToolTitle}>{tool.title}</Text>
+                  <Text style={styles.detailedToolDesc}>{tool.description}</Text>
+                </View>
+              </View>
+              <Text style={styles.detailedToolArrow}>→</Text>
+            </ModernCard>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </ScrollView>
+  );
+
+  // Calendar View
+  const renderCalendar = () => (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Calendario</Text>
+        <Text style={styles.headerSubtitle}>Gestiona tus eventos</Text>
+      </View>
+
+      <CalendarWidget compact={false} />
+
+      {/* Calendar Features */}
+      <Text style={styles.sectionTitle}>Crear Eventos por Voz</Text>
+      <ModernCard glassy elevated style={styles.featureCard}>
+        <Text style={styles.featureIcon}>🎤</Text>
+        <Text style={styles.featureTitle}>Crea eventos hablando</Text>
+        <Text style={styles.featureDesc}>
+          Di: "Crea un evento mañana a las 3 PM llamado Reunión" y listo
+        </Text>
+        <ModernButton
+          title="Probar Ahora"
+          onPress={() => {}}
+          size="small"
+          style={{ marginTop: 12 }}
+        />
+      </ModernCard>
+
+      <Text style={styles.sectionTitle}>Crear Tareas por Voz</Text>
+      <ModernCard glassy elevated style={styles.featureCard}>
+        <Text style={styles.featureIcon}>✅</Text>
+        <Text style={styles.featureTitle}>Tareas rápidas</Text>
+        <Text style={styles.featureDesc}>
+          Di: "Crea una tarea: comprar leche para mañana"
+        </Text>
+        <ModernButton
+          title="Probar Ahora"
+          onPress={() => {}}
+          size="small"
+          style={{ marginTop: 12 }}
+        />
+      </ModernCard>
+
+      <Text style={styles.sectionTitle}>Configurar Alarmas</Text>
+      <ModernCard glassy elevated style={styles.featureCard}>
+        <Text style={styles.featureIcon}>🔔</Text>
+        <Text style={styles.featureTitle}>Alarmas inteligentes</Text>
+        <Text style={styles.featureDesc}>
+          Di: "Recuérdame en 30 minutos sobre la reunión"
+        </Text>
+        <ModernButton
+          title="Probar Ahora"
+          onPress={() => {}}
+          size="small"
+          style={{ marginTop: 12 }}
+        />
+      </ModernCard>
+    </ScrollView>
+  );
+
+  // Settings View
+  const renderSettings = () => (
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Configuración</Text>
+        <Text style={styles.headerSubtitle}>Personaliza tu experiencia</Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>Integraciones</Text>
+      <ModernCard glassy elevated style={styles.settingCard}>
         <View style={styles.settingRow}>
           <View>
-            <Text style={styles.settingLabel}>Palabra de activación</Text>
-            <Text style={styles.settingDesc}>Habilita "Jupyter" para activar</Text>
+            <Text style={styles.settingTitle}>Google Calendar</Text>
+            <Text style={styles.settingDesc}>Sincroniza tus eventos</Text>
           </View>
-          <Switch
-            value={wakeWordEnabled}
-            onValueChange={setWakeWordEnabled}
-            trackColor={{ false: COLORS.border, true: "rgba(59, 130, 246, 0.3)" }}
-            thumbColor={wakeWordEnabled ? COLORS.cyan : COLORS.textMuted}
-          />
+          <View style={[styles.statusBadge, { backgroundColor: COLORS.secondary + "30" }]}>
+            <Text style={styles.statusText}>Conectado</Text>
+          </View>
         </View>
+      </ModernCard>
 
-        {/* MIC SENSITIVITY */}
-        <View style={styles.settingRow}>
-          <Text style={styles.settingLabel}>Sensibilidad del micrófono</Text>
-          <Text style={styles.sensitivityValue}>{Math.round(micSensitivity * 100)}%</Text>
-        </View>
-        <View style={styles.sliderContainer}>
-          <View style={[styles.sliderTrack, { width: `${micSensitivity * 100}%` }]} />
-        </View>
+      <Text style={styles.sectionTitle}>Preferencias</Text>
+      <ModernCard glassy elevated style={styles.settingCard}>
+        <Text style={styles.settingTitle}>Tema</Text>
+        <Text style={styles.settingDesc}>Modo oscuro (Actual)</Text>
+      </ModernCard>
+
+      <ModernCard glassy elevated style={styles.settingCard}>
+        <Text style={styles.settingTitle}>Idioma</Text>
+        <Text style={styles.settingDesc}>Español</Text>
+      </ModernCard>
+
+      <ModernCard glassy elevated style={styles.settingCard}>
+        <Text style={styles.settingTitle}>Privacidad</Text>
+        <Text style={styles.settingDesc}>Controla tus datos</Text>
+      </ModernCard>
+
+      <View style={styles.dangerZone}>
+        <ModernButton
+          title="Cerrar Sesión"
+          onPress={() => {}}
+          variant="outline"
+          size="large"
+        />
       </View>
     </ScrollView>
   );
-};
 
-// ============================================================================
-// SETTINGS VIEW
-// ============================================================================
-const SettingsView = () => {
-  return (
-    <ScrollView style={styles.toolView} showsVerticalScrollIndicator={false}>
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Preferencias</Text>
-        
-        <View style={styles.settingRow}>
-          <Text style={styles.settingLabel}>Tema oscuro</Text>
-          <Switch
-            value={true}
-            onValueChange={() => {}}
-            trackColor={{ false: COLORS.border, true: "rgba(59, 130, 246, 0.3)" }}
-            thumbColor={COLORS.cyan}
-          />
-        </View>
-
-        <View style={styles.settingRow}>
-          <Text style={styles.settingLabel}>Notificaciones</Text>
-          <Switch
-            value={true}
-            onValueChange={() => {}}
-            trackColor={{ false: COLORS.border, true: "rgba(59, 130, 246, 0.3)" }}
-            thumbColor={COLORS.cyan}
-          />
-        </View>
-      </View>
-
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Información</Text>
-        <Text style={styles.infoText}>Versión: 2.0.0</Text>
-        <Text style={styles.infoText}>Última actualización: 30 mayo 2026</Text>
-      </View>
-    </ScrollView>
-  );
-};
-
-// ============================================================================
-// MAIN EXPLORE SCREEN
-// ============================================================================
-export default function ExploreScreen() {
-  const { 
-    availableVoices, selectedVoice, setSelectedVoice
-  } = useVoiceStore();
-
-  // TAB MANAGEMENT
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [currentTool, setCurrentTool] = useState<string | null>(null);
-
-  // CHAT STATES
-  const [chatThreads, setChatThreads] = useState<any[]>([
-    { id: "1", title: "Proyecto Jupyter", messages: [{ role: "assistant", content: "Sistemas iniciados. ¿Qué trabajamos hoy?" }] },
-    { id: "2", title: "Ideas", messages: [] },
-  ]);
-  const [activeThread, setActiveThread] = useState("1");
-  const [chatInput, setChatInput] = useState("");
-
-  // SEARCH STATES
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any>(null);
-  const [searching, setSearching] = useState(false);
-
-  // CODE STUDIO STATES
-  const [selectedAgent, setSelectedAgent] = useState("coder");
-  const [codingPrompt, setCodingPrompt] = useState("");
-  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-  const [coding, setCoding] = useState(false);
-
-  // VOICE SETTINGS
-  const [wakeWordEnabled, setWakeWordEnabled] = useState(true);
-  const [micSensitivity, setMicSensitivity] = useState(0.8);
-
-  // HANDLERS
-  const handleSelectTool = (toolId: string) => {
-    setCurrentTool(toolId);
-    setActiveTab("tools");
-  };
-
-  const handleAISearch = () => {
-    if (!searchQuery.trim()) return;
-    setSearching(true);
-    setSearchResults(null);
-    setTimeout(() => {
-      setSearching(false);
-      setSearchResults({
-        summary: `Resultados sobre "${searchQuery}":\n\nSe han consolidado múltiples fuentes. La información disponible sugiere tendencias interesantes en el área de búsqueda.`,
-        sources: [
-          { id: 1, name: "Fuente principal", url: "https://example.com" },
-          { id: 2, name: "Fuente secundaria", url: "https://example.com" },
-        ]
-      });
-    }, 2000);
-  };
-
-  const handleSendChatMessage = async () => {
-    if (!chatInput.trim()) return;
-    const msgText = chatInput;
-    setChatInput("");
-    
-    setChatThreads(prev => prev.map(t => {
-      if (t.id === activeThread) {
-        return {
-          ...t,
-          messages: [
-            ...t.messages,
-            { role: "user", content: msgText },
-            { role: "assistant", content: "Procesando respuesta..." }
-          ]
-        };
-      }
-      return t;
-    }));
-
-    try {
-      const response = await jupyterVoice.queryGroqLLM(msgText, []);
-      setChatThreads(prev => prev.map(t => {
-        if (t.id === activeThread) {
-          return {
-            ...t,
-            messages: t.messages.map((m, idx) => 
-              idx === t.messages.length - 1 
-                ? { role: "assistant", content: response }
-                : m
-            )
-          };
-        }
-        return t;
-      }));
-    } catch (error) {
-      console.error("Chat error:", error);
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return renderDashboard();
+      case "tools":
+        return renderTools();
+      case "calendar":
+        return renderCalendar();
+      case "settings":
+        return renderSettings();
+      default:
+        return renderDashboard();
     }
-  };
-
-  const handleGenerateCode = () => {
-    if (!codingPrompt.trim()) return;
-    setCoding(true);
-    setTimeout(() => {
-      setCoding(false);
-      setGeneratedCode(`// ${selectedAgent.toUpperCase()}\n\nconst example = () => {\n  // Código generado por el agente ${selectedAgent}\n  console.log("Hola desde Jupyter");\n};`);
-    }, 1500);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
 
-      {/* HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Jupyter</Text>
+      {renderContent()}
+
+      {/* Bottom Navigation */}
+      <View style={styles.bottomNav}>
+        {["dashboard", "tools", "calendar", "settings"].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[
+              styles.navItem,
+              activeTab === tab && styles.navItemActive,
+            ]}
+            onPress={() => setActiveTab(tab as TabType)}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.navIcon,
+                activeTab === tab && styles.navIconActive,
+              ]}
+            >
+              {tab === "dashboard" && "📊"}
+              {tab === "tools" && "🔧"}
+              {tab === "calendar" && "📅"}
+              {tab === "settings" && "⚙️"}
+            </Text>
+            <Text
+              style={[
+                styles.navLabel,
+                activeTab === tab && styles.navLabelActive,
+              ]}
+            >
+              {tab === "dashboard" && "Panel"}
+              {tab === "tools" && "Herr."}
+              {tab === "calendar" && "Cal."}
+              {tab === "settings" && "Config"}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
-
-      {/* TAB NAVIGATION */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* CONTENT */}
-      {activeTab === "dashboard" && <DashboardView onSelectTool={handleSelectTool} />}
-      
-      {activeTab === "tools" && currentTool === "chat" && (
-        <ChatToolView
-          chatThreads={chatThreads}
-          activeThread={activeThread}
-          setActiveThread={setActiveThread}
-          chatInput={chatInput}
-          setChatInput={setChatInput}
-          handleSendChatMessage={handleSendChatMessage}
-        />
-      )}
-
-      {activeTab === "tools" && currentTool === "search" && (
-        <SearchToolView
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          handleAISearch={handleAISearch}
-          searchResults={searchResults}
-          searching={searching}
-        />
-      )}
-
-      {activeTab === "tools" && currentTool === "code" && (
-        <CodeToolView
-          selectedAgent={selectedAgent}
-          setSelectedAgent={setSelectedAgent}
-          codingPrompt={codingPrompt}
-          setCodingPrompt={setCodingPrompt}
-          generatedCode={generatedCode}
-          coding={coding}
-          onGenerateCode={handleGenerateCode}
-        />
-      )}
-
-      {activeTab === "tools" && currentTool === "voice" && (
-        <VoiceToolView
-          wakeWordEnabled={wakeWordEnabled}
-          setWakeWordEnabled={setWakeWordEnabled}
-          micSensitivity={micSensitivity}
-          setMicSensitivity={setMicSensitivity}
-          availableVoices={availableVoices}
-          selectedVoice={selectedVoice}
-          setSelectedVoice={setSelectedVoice}
-        />
-      )}
-
-      {activeTab === "automations" && (
-        <View style={styles.toolView}>
-          <View style={styles.sectionContainer}>
-            <Text style={styles.sectionTitle}>Automatizaciones</Text>
-            <View style={styles.emptyStateContainer}>
-              <Text style={styles.emptyStateIcon}>⚙️</Text>
-              <Text style={styles.emptyStateText}>Sección en desarrollo</Text>
-            </View>
-          </View>
-        </View>
-      )}
-
-      {activeTab === "settings" && <SettingsView />}
     </SafeAreaView>
   );
 }
 
-// ============================================================================
-// MODERN STYLESHEET
-// ============================================================================
 const styles = StyleSheet.create({
-  // GENERAL
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+
+  // Header
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
+    paddingVertical: 24,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: COLORS.cyan,
-  },
-
-  // TAB NAVIGATION
-  tabNavigation: {
-    flexDirection: "row",
-    paddingHorizontal: 8,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    gap: 8,
-  },
-  tabButton: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  tabButtonActive: {
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-    borderBottomWidth: 2,
-    borderBottomColor: COLORS.cyan,
-  },
-  tabIcon: {
-    fontSize: 20,
+    color: COLORS.text,
     marginBottom: 4,
   },
-  tabLabel: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    fontWeight: "600",
-  },
-  tabLabelActive: {
-    color: COLORS.cyan,
-    fontWeight: "700",
-  },
-
-  // DASHBOARD VIEW
-  dashboardView: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  heroSection: {
-    paddingVertical: 24,
-    paddingHorizontal: 12,
-  },
-  heroTitle: {
-    fontSize: 32,
-    fontWeight: "900",
-    color: COLORS.text,
-    marginBottom: 6,
-  },
-  heroSubtitle: {
+  headerSubtitle: {
     fontSize: 14,
     color: COLORS.textMuted,
     fontWeight: "500",
   },
 
-  // STATS
+  // Stats Grid
   statsGrid: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 24,
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   statCard: {
     flex: 1,
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 14,
+    paddingVertical: 16,
     alignItems: "center",
   },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: "900",
-    color: COLORS.cyan,
+  statValue: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: COLORS.primary,
   },
   statLabel: {
     fontSize: 11,
     color: COLORS.textMuted,
-    marginTop: 6,
-    textAlign: "center",
-  },
-
-  // SECTION
-  sectionContainer: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 12,
+    marginTop: 4,
+    fontWeight: "600",
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
 
-  // TOOLS GRID
-  toolsGridLayout: {
+  // Search
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 24,
+  },
+
+  // Section Title
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    marginTop: 8,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  // Tools Grid (Featured)
+  toolsGrid: {
+    paddingHorizontal: 20,
+    gap: 12,
+    marginBottom: 20,
+  },
+  toolCard: {
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    alignItems: "center",
+  },
+  toolIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  toolTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: COLORS.text,
+    textAlign: "center",
+  },
+  toolDesc: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 4,
+    textAlign: "center",
+  },
+
+  // All Tools Grid
+  allToolsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
-    justifyContent: "space-between",
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
-  toolCardBase: {
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
+  toolItemContainer: {
+    width: (SCREEN_WIDTH - 52) / 2,
+  },
+  toolItem: {
     borderRadius: 16,
     padding: 14,
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
-  toolCardActive: {
-    borderColor: COLORS.cyan,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-  },
-  toolCardContent: {
-    flex: 1,
-  },
-  toolCardIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-  toolCardTitle: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 4,
-  },
-  toolCardDesc: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  toolCardArrow: {
-    marginLeft: 8,
-  },
-  arrowText: {
-    fontSize: 16,
-    color: COLORS.cyan,
-  },
-
-  // ACTIVITY
-  activityList: {
-    gap: 12,
-  },
-  activityItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  activityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: COLORS.cyan,
-    marginTop: 6,
-  },
-  activityText: {
-    fontSize: 13,
-    color: COLORS.text,
-    fontWeight: "500",
-  },
-  activityTime: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
-
-  // TOOL VIEW
-  toolView: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-
-  // CHAT
-  chatSidebar: {
-    flex: 0.4,
-    backgroundColor: COLORS.cardBg,
-    borderRightWidth: 1,
-    borderRightColor: COLORS.border,
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 12,
-  },
-  sidebarHeader: {
-    fontSize: 10,
-    fontFamily: "monospace",
-    color: COLORS.textMuted,
-    fontWeight: "700",
+  toolItemIcon: {
+    fontSize: 28,
     marginBottom: 8,
   },
-  threadItem: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: COLORS.background,
-    marginBottom: 6,
-  },
-  threadItemActive: {
-    backgroundColor: "rgba(59, 130, 246, 0.15)",
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.cyan,
-  },
-  threadText: {
+  toolItemTitle: {
     fontSize: 12,
-    color: COLORS.text,
-  },
-
-  chatMain: {
-    flex: 1,
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 16,
-    flexDirection: "column",
-    overflow: "hidden",
-  },
-  messagesList: {
-    flex: 1,
-    padding: 12,
-  },
-  messageBubble: {
-    marginVertical: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 12,
-    maxWidth: "80%",
-  },
-  msgUser: {
-    alignSelf: "flex-end",
-    backgroundColor: "rgba(59, 130, 246, 0.2)",
-  },
-  msgAssistant: {
-    alignSelf: "flex-start",
-    backgroundColor: COLORS.background,
-  },
-  messageText: {
-    fontSize: 12,
-    color: COLORS.text,
-  },
-
-  chatInputRow: {
-    flexDirection: "row",
-    gap: 8,
-    padding: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    alignItems: "flex-end",
-  },
-  chatInput: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    color: COLORS.text,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 12,
-    maxHeight: 100,
-  },
-  chatSendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: COLORS.cyan,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  chatSendIcon: {
-    fontSize: 18,
-    color: COLORS.background,
-  },
-
-  // SEARCH
-  searchSection: {
-    marginVertical: 16,
-  },
-  searchInputRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    color: COLORS.text,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 13,
-  },
-  searchButton: {
-    width: 44,
-    borderRadius: 12,
-    backgroundColor: COLORS.cyan,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  searchButtonText: {
-    fontSize: 18,
-  },
-
-  resultsContainer: {
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
-    marginVertical: 12,
-  },
-  resultSummaryTitle: {
-    fontSize: 10,
-    fontFamily: "monospace",
-    color: COLORS.cyan,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  resultSummaryText: {
-    fontSize: 12,
-    color: COLORS.text,
-    lineHeight: 18,
-    marginBottom: 16,
-  },
-  sourcesHeader: {
-    fontSize: 10,
-    fontFamily: "monospace",
-    color: COLORS.textMuted,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  sourceCard: {
-    backgroundColor: COLORS.background,
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 6,
-  },
-  sourceName: {
-    fontSize: 12,
-    color: COLORS.text,
-    fontWeight: "500",
-  },
-  sourceUrl: {
-    fontSize: 10,
-    color: COLORS.cyan,
-    marginTop: 4,
-  },
-
-  // CODE STUDIO
-  agentSection: {
-    marginVertical: 16,
-  },
-  agentGrid: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  agentCard: {
-    flex: 1,
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  agentCardActive: {
-    borderColor: COLORS.green,
-    backgroundColor: "rgba(16, 185, 129, 0.1)",
-  },
-  agentIcon: {
-    fontSize: 24,
-    marginBottom: 6,
-  },
-  agentLabel: {
-    fontSize: 11,
-    color: COLORS.text,
     fontWeight: "600",
-  },
-
-  codePromptInput: {
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
     color: COLORS.text,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 12,
-    minHeight: 80,
-    marginBottom: 12,
+    textAlign: "center",
   },
 
-  generateBtn: {
-    backgroundColor: COLORS.cyan,
-    borderRadius: 12,
-    paddingVertical: 12,
+  // Detailed Tools List
+  detailedToolsList: {
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  detailedToolCard: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
-  generateBtnDisabled: {
-    opacity: 0.6,
+  detailedToolContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  generateBtnText: {
-    color: COLORS.background,
-    fontSize: 12,
+  detailedToolIcon: {
+    fontSize: 28,
+  },
+  detailedToolInfo: {
+    flex: 1,
+  },
+  detailedToolTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  detailedToolDesc: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 2,
+  },
+  detailedToolArrow: {
+    fontSize: 16,
+    color: COLORS.primary,
     fontWeight: "700",
   },
 
-  codeOutputSection: {
-    marginTop: 20,
-  },
-  codeBlock: {
-    backgroundColor: COLORS.background,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-  },
-  codeText: {
-    fontFamily: "monospace",
-    fontSize: 11,
-    color: COLORS.green,
-  },
-
-  // VOICE STUDIO
-  voiceOption: {
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
+  // Feature Cards
+  featureCard: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingVertical: 20,
     alignItems: "center",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 8,
   },
-  voiceOptionActive: {
-    borderColor: COLORS.cyan,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
+  featureIcon: {
+    fontSize: 40,
+    marginBottom: 12,
   },
-  voiceOptionName: {
-    fontSize: 13,
-    color: COLORS.text,
-    fontWeight: "500",
-  },
-  voiceOptionLang: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    marginTop: 4,
-  },
-  voiceCheckmark: {
+  featureTitle: {
     fontSize: 16,
-    color: COLORS.green,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 6,
+  },
+  featureDesc: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: "center",
+    lineHeight: 16,
   },
 
-  // SETTINGS
+  // Setting Cards
+  settingCard: {
+    marginHorizontal: 20,
+    marginBottom: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
   settingRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
   },
-  settingLabel: {
-    fontSize: 13,
+  settingTitle: {
+    fontSize: 14,
+    fontWeight: "700",
     color: COLORS.text,
-    fontWeight: "500",
   },
   settingDesc: {
     fontSize: 11,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 2,
   },
-  sensitivityValue: {
-    fontSize: 12,
-    color: COLORS.cyan,
-    fontWeight: "700",
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  sliderContainer: {
-    height: 6,
+  statusText: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: COLORS.secondary,
+  },
+
+  // Danger Zone
+  dangerZone: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+    marginBottom: 20,
+  },
+
+  // Bottom Navigation
+  bottomNav: {
+    flexDirection: "row",
     backgroundColor: COLORS.cardBg,
-    borderRadius: 3,
-    overflow: "hidden",
-    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingHorizontal: 0,
   },
-  sliderTrack: {
-    height: "100%",
-    backgroundColor: COLORS.cyan,
-    borderRadius: 3,
-  },
-
-  infoText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    paddingVertical: 8,
-  },
-
-  // LOADING & EMPTY STATES
-  loadingContainer: {
+  navItem: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 40,
-    gap: 12,
+    paddingVertical: 12,
+    borderTopWidth: 2,
+    borderTopColor: "transparent",
   },
-  loadingText: {
+  navItemActive: {
+    borderTopColor: COLORS.primary,
+  },
+  navIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  navIconActive: {
+    fontSize: 20,
+  },
+  navLabel: {
+    fontSize: 10,
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontWeight: "600",
   },
-
-  emptyStateContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-    gap: 10,
-  },
-  emptyStateIcon: {
-    fontSize: 48,
-  },
-  emptyStateText: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-    fontWeight: "500",
+  navLabelActive: {
+    color: COLORS.primary,
+    fontWeight: "700",
   },
 });
