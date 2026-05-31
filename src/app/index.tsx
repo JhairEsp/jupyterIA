@@ -87,26 +87,26 @@ export default function HomeScreen() {
   const getCoreGlowColor = () => {
     switch (currentState) {
       case "escuchando":
-        return COLORS.cyan; // Electric Cyan (Primary)
+        return COLORS.cyan; // Azul moderno (Primary)
       case "pensando":
-        return COLORS.purple; // Pulsing Violet
+        return COLORS.purple; // Púrpura pensativo
       case "hablando":
-        return "#00daf3"; // Illuminated Cyan
+        return COLORS.cyan; // Azul hablando
       case "accion":
       case "ejecutando":
-        return COLORS.cyan; // Glowing electric cyan for actions
+        return COLORS.orange; // Naranja para acciones activas
       case "investigando":
-        return "#ffeac0"; // Tertiary Warm Peach
+        return COLORS.green; // Verde para investigación
       case "analizando":
-        return COLORS.cyan; // Glowing Electric Cyan
+        return COLORS.cyan; // Azul para análisis
       case "background":
-        return COLORS.indigo; // Muted Secondary Indigo
+        return COLORS.indigo; // Indigo de fondo
       case "offline":
-        return "#353436"; // Elevated surface gray
+        return COLORS.textMuted; // Gris mutado offline
       case "error":
-        return COLORS.red; // Soft Error Red (Azure Nexus)
+        return COLORS.red; // Rojo error limpio
       default:
-        return "#1c1b1c"; // Dim Obsidian
+        return COLORS.cardBg; // Gris oscuro por defecto
     }
   };
 
@@ -630,16 +630,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(30, 41, 59, 0.8)",
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.cardBg,
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
     gap: 6,
   },
   dockActiveButton: {
-    borderColor: "#4F46E5",
-    backgroundColor: "rgba(79, 70, 229, 0.1)",
+    borderColor: COLORS.cyan,
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
   },
   dockButtonIcon: {
     fontSize: 14,
@@ -656,8 +656,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(239, 68, 68, 0.2)",
-    backgroundColor: "rgba(127, 29, 29, 0.15)",
+    borderColor: "rgba(239, 68, 68, 0.3)",
+    backgroundColor: "rgba(239, 68, 68, 0.1)",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
   dockStopButtonText: {
     fontSize: 10,
     fontWeight: "600",
-    color: "#F87171",
+    color: COLORS.red,
     textTransform: "uppercase",
     letterSpacing: 0.5,
   },
@@ -674,15 +674,15 @@ const styles = StyleSheet.create({
   // MODAL STYLE CLASSES
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(2, 6, 23, 0.8)",
+    backgroundColor: "rgba(15, 23, 42, 0.8)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0B0B14",
+    backgroundColor: COLORS.cardBg,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(30, 41, 59, 0.8)",
+    borderColor: COLORS.border,
     maxHeight: "75%",
     padding: 24,
   },
@@ -695,23 +695,23 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#F1F5F9",
+    color: COLORS.text,
   },
   modalCloseButton: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "rgba(30, 41, 59, 0.5)",
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalCloseText: {
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     fontSize: 12,
   },
   modalSub: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     lineHeight: 15,
     marginBottom: 16,
   },
@@ -722,16 +722,16 @@ const styles = StyleSheet.create({
   voiceItem: {
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(30, 41, 59, 0.8)",
+    borderColor: COLORS.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   voiceItemSelected: {
-    borderColor: "#6366F1",
-    backgroundColor: "rgba(99, 102, 241, 0.1)",
+    borderColor: COLORS.cyan,
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
   },
   voiceInfo: {
     flex: 1,
@@ -739,15 +739,15 @@ const styles = StyleSheet.create({
   voiceName: {
     fontSize: 13,
     fontWeight: "500",
-    color: "#CBD5E1",
+    color: COLORS.text,
   },
   voiceTextSelected: {
-    color: "#FFFFFF",
+    color: COLORS.cyan,
     fontWeight: "600",
   },
   voiceLang: {
     fontSize: 9,
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginTop: 2,
     fontFamily: "monospace",
   },
@@ -762,13 +762,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 12,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     textAlign: "center",
     fontWeight: "500",
   },
   emptySubtext: {
     fontSize: 10,
-    color: "#64748B",
+    color: COLORS.textMuted,
     textAlign: "center",
   },
   minimizedTouch: {
