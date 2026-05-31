@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useVoiceStore } from "../store/voiceStore";
 import { jupyterVoice } from "../services/VoiceAssistantService";
+import { COLORS } from "../theme/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -1015,7 +1016,7 @@ export default function ExploreScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#020205",
+    backgroundColor: COLORS.background,
   },
   safeArea: {
     flex: 1,
@@ -1025,24 +1026,24 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.05)",
+    borderBottomColor: "rgba(59, 130, 246, 0.1)",
   },
   telemetryTitle: {
     fontSize: 9,
     fontFamily: "monospace",
     letterSpacing: 2,
     fontWeight: "700",
-    color: "#64748B",
+    color: COLORS.textMuted,
   },
   title: {
     fontSize: 26,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: COLORS.text,
     marginTop: 4,
   },
   subtitle: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     marginTop: 6,
     lineHeight: 16,
     fontWeight: "300",
@@ -1066,29 +1067,29 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.08)",
+    borderBottomColor: "rgba(59, 130, 246, 0.1)",
     paddingBottom: 12,
   },
   toolTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: COLORS.text,
   },
   toolDesc: {
     fontSize: 11,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     lineHeight: 15,
   },
   backButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: "rgba(59, 130, 246, 0.1)",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: "rgba(59, 130, 246, 0.2)",
   },
   backText: {
-    color: "#E2E8F0",
+    color: COLORS.cyan,
     fontSize: 11,
     fontWeight: "600",
   },
@@ -1101,8 +1102,8 @@ const styles = StyleSheet.create({
   },
   chatSidebar: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 10,
@@ -1111,22 +1112,22 @@ const styles = StyleSheet.create({
   sidebarHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
     fontWeight: "bold",
     marginBottom: 4,
   },
   threadItem: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: COLORS.background,
   },
   threadItemActive: {
-    backgroundColor: "rgba(99, 102, 241, 0.15)",
-    borderColor: "rgba(99, 102, 241, 0.3)",
+    backgroundColor: "rgba(59, 130, 246, 0.15)",
+    borderColor: "rgba(59, 130, 246, 0.3)",
     borderWidth: 1,
   },
   threadText: {
-    color: "#CBD5E1",
+    color: COLORS.text,
     fontSize: 11,
   },
   newChatBtn: {
@@ -1134,18 +1135,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: "dashed",
-    borderColor: "#475569",
+    borderColor: COLORS.border,
     alignItems: "center",
     marginTop: "auto",
   },
   newChatText: {
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     fontSize: 11,
   },
   chatMain: {
     flex: 2.2,
-    backgroundColor: "rgba(15, 23, 42, 0.2)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 10,
@@ -1159,16 +1160,16 @@ const styles = StyleSheet.create({
   },
   msgUser: {
     alignSelf: "flex-end",
-    backgroundColor: "#4F46E5",
+    backgroundColor: "rgba(59, 130, 246, 0.2)",
   },
   msgAssistant: {
     alignSelf: "flex-start",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    borderColor: COLORS.border,
   },
   msgText: {
-    color: "#F1F5F9",
+    color: COLORS.text,
     fontSize: 12,
   },
   chatInputRow: {
@@ -1178,11 +1179,11 @@ const styles = StyleSheet.create({
   },
   chatTextInput: {
     flex: 1,
-    backgroundColor: "rgba(2, 6, 23, 0.8)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    borderColor: COLORS.border,
     borderRadius: 12,
-    color: "#E2E8F0",
+    color: COLORS.text,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 12,
@@ -1191,7 +1192,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#4F46E5",
+    backgroundColor: COLORS.cyan,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1206,28 +1207,28 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
+    backgroundColor: COLORS.cardBg,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: COLORS.border,
     borderRadius: 16,
     paddingHorizontal: 14,
-    color: "#FFFFFF",
+    color: COLORS.text,
     fontSize: 13,
   },
   searchButton: {
     paddingHorizontal: 16,
     borderRadius: 16,
-    backgroundColor: "#0EA5E9",
+    backgroundColor: COLORS.cyan,
     justifyContent: "center",
   },
   searchButtonText: {
-    color: "#FFFFFF",
+    color: COLORS.background,
     fontSize: 12,
     fontWeight: "700",
   },
   searchResultsContainer: {
-    backgroundColor: "rgba(15, 23, 42, 0.3)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1236,19 +1237,19 @@ const styles = StyleSheet.create({
   searchSummaryTitle: {
     fontSize: 10,
     fontFamily: "monospace",
-    color: "#0EA5E9",
+    color: COLORS.cyan,
     fontWeight: "700",
     marginBottom: 6,
   },
   searchSummaryText: {
     fontSize: 12,
-    color: "#E2E8F0",
+    color: COLORS.text,
     lineHeight: 18,
   },
   sourcesHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginTop: 14,
     marginBottom: 6,
     fontWeight: "700",
@@ -1256,16 +1257,16 @@ const styles = StyleSheet.create({
   sourceCard: {
     padding: 8,
     borderRadius: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.02)",
+    backgroundColor: COLORS.background,
     marginVertical: 3,
   },
   sourceName: {
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     fontSize: 10,
     fontWeight: "600",
   },
   sourceUrl: {
-    color: "#0EA5E9",
+    color: COLORS.cyan,
     fontSize: 9,
     marginTop: 1,
   },
@@ -1285,13 +1286,13 @@ const styles = StyleSheet.create({
   },
   aiSuggestionText: {
     flex: 1,
-    color: "#E2E8F0",
+    color: COLORS.text,
     fontSize: 11,
     lineHeight: 16,
   },
   actionCard: {
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1299,7 +1300,7 @@ const styles = StyleSheet.create({
   actionCardTitle: {
     fontSize: 10,
     fontFamily: "monospace",
-    color: "#CBD5E1",
+    color: COLORS.text,
     letterSpacing: 1,
     marginBottom: 8,
   },
@@ -1309,21 +1310,21 @@ const styles = StyleSheet.create({
   },
   quickInput: {
     flex: 1,
-    backgroundColor: "rgba(2, 6, 23, 0.6)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: COLORS.border,
     borderRadius: 12,
-    color: "#FFFFFF",
+    color: COLORS.text,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 12,
   },
   quickInputFull: {
-    backgroundColor: "rgba(2, 6, 23, 0.6)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    borderColor: COLORS.border,
     borderRadius: 12,
-    color: "#FFFFFF",
+    color: COLORS.text,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 12,
@@ -1335,13 +1336,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   formSubmitText: {
-    color: "#FFFFFF",
+    color: COLORS.background,
     fontSize: 11,
     fontWeight: "700",
   },
   listsBox: {
-    backgroundColor: "rgba(15, 23, 42, 0.2)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1349,7 +1350,7 @@ const styles = StyleSheet.create({
   listsBoxHeader: {
     fontSize: 10,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginBottom: 10,
   },
   taskRow: {
@@ -1357,25 +1358,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.03)",
+    borderBottomColor: COLORS.border,
   },
   checkSquare: {
     width: 18,
     height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
-    borderColor: "#475569",
+    borderColor: COLORS.border,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
   },
   checkText: {
-    color: "#10B981",
+    color: COLORS.green,
     fontSize: 11,
     fontWeight: "bold",
   },
   taskTextTitle: {
-    color: "#E2E8F0",
+    color: COLORS.text,
     fontSize: 12,
     flex: 1,
   },
@@ -1388,8 +1389,8 @@ const styles = StyleSheet.create({
 
   // AUTOMATIONS GRAPHIC REPRESENTATION
   nodeEditorContainer: {
-    backgroundColor: "rgba(15, 23, 42, 0.5)",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1397,7 +1398,7 @@ const styles = StyleSheet.create({
   nodeHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginBottom: 12,
   },
   workflowVisualRow: {
@@ -1409,17 +1410,17 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     borderRadius: 12,
-    backgroundColor: "rgba(2, 6, 23, 0.7)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
   },
   nodeType: {
     fontSize: 7,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
   },
   nodeVal: {
     fontSize: 9,
-    color: "#FFFFFF",
+    color: COLORS.text,
     fontWeight: "bold",
     marginTop: 2,
   },
@@ -1433,23 +1434,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.03)",
+    borderBottomColor: COLORS.border,
   },
   automationTrigger: {
     fontSize: 11,
-    color: "#E2E8F0",
+    color: COLORS.text,
     fontWeight: "600",
   },
   automationAction: {
     fontSize: 10,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     marginTop: 2,
   },
 
   // MEMORY
   memoryForm: {
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1460,10 +1461,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.03)",
+    borderBottomColor: COLORS.border,
   },
   memoryText: {
-    color: "#CBD5E1",
+    color: COLORS.text,
     fontSize: 12,
     flex: 1,
     lineHeight: 16,
@@ -1480,15 +1481,15 @@ const styles = StyleSheet.create({
   },
   agentSelectCard: {
     width: "48%",
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 12,
   },
   agentSelectCardActive: {
-    borderColor: "#10B981",
-    backgroundColor: "rgba(16, 185, 129, 0.06)",
+    borderColor: COLORS.green,
+    backgroundColor: "rgba(16, 185, 129, 0.1)",
   },
   agentSelectAvatar: {
     fontSize: 22,
@@ -1496,18 +1497,18 @@ const styles = StyleSheet.create({
   agentSelectName: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: COLORS.text,
     marginTop: 6,
   },
   agentSelectDesc: {
     fontSize: 9,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     marginTop: 4,
     lineHeight: 12,
   },
   agentConsole: {
-    backgroundColor: "#05050A",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: COLORS.background,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 14,
@@ -1515,11 +1516,11 @@ const styles = StyleSheet.create({
   agentConsoleHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#10B981",
+    color: COLORS.green,
   },
   agentConsoleStatus: {
     fontSize: 10,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     fontFamily: "monospace",
     marginTop: 6,
   },
@@ -1531,16 +1532,16 @@ const styles = StyleSheet.create({
   },
   fileCard: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 10,
     alignItems: "center",
   },
   fileCardActive: {
-    borderColor: "#8B5CF6",
-    backgroundColor: "rgba(139, 92, 246, 0.08)",
+    borderColor: COLORS.purple,
+    backgroundColor: "rgba(139, 92, 246, 0.1)",
   },
   fileIcon: {
     fontSize: 24,
@@ -1548,18 +1549,18 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 10,
     fontWeight: "600",
-    color: "#CBD5E1",
+    color: COLORS.text,
     marginTop: 6,
     textAlign: "center",
   },
   fileSize: {
     fontSize: 8,
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginTop: 2,
   },
   fileAnalysisCard: {
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
@@ -1567,20 +1568,20 @@ const styles = StyleSheet.create({
   analysisHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#8B5CF6",
+    color: COLORS.purple,
     marginBottom: 8,
   },
   analysisBody: {
     fontSize: 11,
-    color: "#E2E8F0",
+    color: COLORS.text,
     lineHeight: 16,
   },
 
   // SCREEN SIMULATOR
   screenSimulatorFrame: {
     height: 180,
-    backgroundColor: "#0A0A10",
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: COLORS.background,
+    borderColor: COLORS.border,
     borderWidth: 2,
     borderRadius: 20,
     overflow: "hidden",
@@ -1589,13 +1590,13 @@ const styles = StyleSheet.create({
   mockStatusBar: {
     height: 20,
     width: "100%",
-    backgroundColor: "#05050A",
+    backgroundColor: COLORS.cardBg,
     alignItems: "center",
     justifyContent: "center",
   },
   mockStatusText: {
     fontSize: 8,
-    color: "#475569",
+    color: COLORS.textMuted,
     fontFamily: "monospace",
   },
   mockScreenContent: {
@@ -1607,7 +1608,7 @@ const styles = StyleSheet.create({
   },
   mockScreenTextHeader: {
     fontSize: 10,
-    color: "#64748B",
+    color: COLORS.textMuted,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -1622,23 +1623,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 2,
-    backgroundColor: "#8B5CF6",
-    shadowColor: "#8B5CF6",
+    backgroundColor: COLORS.purple,
+    shadowColor: COLORS.purple,
     shadowRadius: 10,
     elevation: 8,
   },
 
   // CODING HUB
   codingForm: {
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
   },
   codeViewerCard: {
-    backgroundColor: "#05050A",
-    borderColor: "rgba(255, 255, 255, 0.08)",
+    backgroundColor: COLORS.background,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 14,
@@ -1646,7 +1647,7 @@ const styles = StyleSheet.create({
   codeHeader: {
     fontSize: 9,
     fontFamily: "monospace",
-    color: "#0EA5E9",
+    color: COLORS.cyan,
     marginBottom: 6,
   },
   codeScroll: {
@@ -1655,7 +1656,7 @@ const styles = StyleSheet.create({
   codeBody: {
     fontFamily: "monospace",
     fontSize: 10,
-    color: "#E2E8F0",
+    color: COLORS.text,
   },
 
   // VOICE STUDIO
@@ -1668,18 +1669,18 @@ const styles = StyleSheet.create({
   sliderTrack: {
     flex: 1,
     height: 6,
-    backgroundColor: "#1E293B",
+    backgroundColor: COLORS.cardBg,
     borderRadius: 3,
     overflow: "hidden",
   },
   sliderFill: {
     height: "100%",
-    backgroundColor: "#8B5CF6",
+    backgroundColor: COLORS.purple,
   },
   sliderValueText: {
     fontSize: 10,
     fontFamily: "monospace",
-    color: "#FFFFFF",
+    color: COLORS.text,
   },
   btnRow: {
     flexDirection: "row",
@@ -1693,7 +1694,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   optionText: {
-    color: "#CBD5E1",
+    color: COLORS.text,
     fontSize: 10,
   },
   switchRow: {
@@ -1703,23 +1704,23 @@ const styles = StyleSheet.create({
   },
   optionSub: {
     fontSize: 9,
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginTop: 2,
     maxWidth: "80%",
   },
   voiceOptionBtn: {
     padding: 10,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.02)",
+    backgroundColor: COLORS.background,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: COLORS.border,
   },
   voiceOptionActive: {
-    borderColor: "#8B5CF6",
+    borderColor: COLORS.purple,
     backgroundColor: "rgba(139, 92, 246, 0.1)",
   },
   voiceOptionText: {
-    color: "#CBD5E1",
+    color: COLORS.text,
     fontSize: 11,
   },
 
@@ -1731,7 +1732,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   submitBtnText: {
-    color: "#FFFFFF",
+    color: COLORS.background,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1,
@@ -1747,8 +1748,8 @@ const styles = StyleSheet.create({
   },
   smallWidgetCard: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.3)",
-    borderColor: "rgba(255, 255, 255, 0.06)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 16,
     padding: 12,
@@ -1757,24 +1758,24 @@ const styles = StyleSheet.create({
   widgetHeader: {
     fontSize: 8,
     fontFamily: "monospace",
-    color: "#64748B",
+    color: COLORS.textMuted,
     fontWeight: "bold",
   },
   widgetBigText: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#FFFFFF",
+    color: COLORS.text,
     marginVertical: 4,
   },
   widgetSub: {
     fontSize: 7,
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     textAlign: "center",
   },
   gridSectionHeader: {
     fontSize: 10,
     fontFamily: "monospace",
-    color: "#475569",
+    color: COLORS.textMuted,
     letterSpacing: 1.5,
     marginBottom: -4,
   },
@@ -1785,8 +1786,8 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     width: "48%",
-    backgroundColor: "rgba(15, 23, 42, 0.4)",
-    borderColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: COLORS.cardBg,
+    borderColor: COLORS.border,
     borderWidth: 1,
     borderRadius: 20,
     padding: 14,
@@ -1801,12 +1802,12 @@ const styles = StyleSheet.create({
   gridCardTitle: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: COLORS.text,
     marginTop: 8,
   },
   gridCardDesc: {
     fontSize: 9,
-    color: "#64748B",
+    color: COLORS.textMuted,
     marginTop: 4,
     lineHeight: 12,
   },
@@ -1818,13 +1819,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   loadingText: {
-    color: "#94A3B8",
+    color: COLORS.textMuted,
     fontSize: 10,
     fontStyle: "italic",
   },
   emptyText: {
     fontSize: 11,
-    color: "#475569",
+    color: COLORS.textMuted,
     textAlign: "center",
     paddingVertical: 16,
     fontStyle: "italic",
