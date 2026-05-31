@@ -1,19 +1,47 @@
 export const COLORS = {
-  background: "#0F172A",      // Fondo gris oscuro profesional
-  cardBg: "#1E293B",          // Tarjetas más claras para contraste
-  border: "#334155",          // Bordes sutiles
-  text: "#F8FAFC",            // Texto blanco limpio
-  textMuted: "#94A3B8",       // Texto mutado gris
+  // Modern Dark Theme - Ultra Sleek
+  background: "#0A0E27",      // Ultra dark blue-black
+  backgroundSecondary: "#0F1629", // Slightly lighter
+  cardBg: "#1A202C",          // Card background
+  cardBgLight: "#232E4A",     // Light card for contrast
+  border: "#2D3E5F",          // Subtle borders
+  borderLight: "#3F5578",     // Light borders
   
-  // Paleta moderna y amigable de ingeniería
-  cyan: "#3B82F6",            // Azul moderno (Primario)
-  indigo: "#6366F1",          // Indigo suave (Secundario)
-  purple: "#8B5CF6",          // Púrpura (Complementario)
-  green: "#10B981",           // Verde ingeniero (Acento)
-  orange: "#F97316",          // Naranja cálido (Acento activo)
-  red: "#EF4444",             // Rojo error limpio
+  // Typography
+  text: "#F0F4F8",            // Primary text - white
+  textSecondary: "#B0C4DE",   // Secondary text - silver
+  textMuted: "#7A8FA6",       // Muted text - slate
   
-  // Dynamic glow gradients & background tints
-  glowGradStart: "rgba(59, 130, 246, 0.1)",   // Azul suave
-  glowGradEnd: "rgba(16, 185, 129, 0.05)",    // Verde suave
+  // Modern Accent Colors (Dribbble-inspired)
+  primary: "#00D9FF",         // Cyan neon (Primary action)
+  primaryDark: "#0BA5CC",     // Darker cyan
+  secondary: "#00F5A0",       // Mint green (Success)
+  accent: "#FF6B35",          // Warm orange (Attention)
+  accentWarm: "#FFB84D",      // Warm yellow-orange
+  
+  // Additional palette
+  purple: "#A855F7",          // Modern purple
+  blue: "#3B82F6",            // Clean blue
+  green: "#10B981",           // Emerald green
+  red: "#FF4757",             // Vibrant red
+  
+  // Glassmorphism & Effects
+  glass: "rgba(255, 255, 255, 0.05)",     // Glass effect base
+  glassLight: "rgba(255, 255, 255, 0.08)", // Lighter glass
+  glassHover: "rgba(255, 255, 255, 0.12)", // Hover glass
+  
+  // Gradients
+  gradientPrimary: "linear-gradient(135deg, #00D9FF 0%, #0BA5CC 100%)",
+  gradientSuccess: "linear-gradient(135deg, #00F5A0 0%, #00D9A3 100%)",
+  gradientWarm: "linear-gradient(135deg, #FF6B35 0%, #FFB84D 100%)",
+  
+  // Shadow & Glow
+  glow: "rgba(0, 217, 255, 0.3)",
+  glowGreen: "rgba(0, 245, 160, 0.2)",
+  glowWarm: "rgba(255, 107, 53, 0.2)",
+  
+  // Legacy support for existing code
+  cyan: "#00D9FF",
+  indigo: "#6366F1",
+  orange: "#FF6B35",
 };

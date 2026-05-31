@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StatusBar, 
-  StyleSheet, 
-  Dimensions, 
-  ScrollView, 
-  TextInput, 
-  Modal, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StatusBar,
+  StyleSheet,
+  Dimensions,
+  ScrollView,
+  TextInput,
+  Modal,
   FlatList,
   KeyboardAvoidingView,
-  Platform
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
@@ -22,26 +22,28 @@ import { FloatingContainer } from "../components/FloatingContainer";
 import { VoiceStateIndicator } from "../components/VoiceStateIndicator";
 import { jupyterVoice } from "../services/VoiceAssistantService";
 import { COLORS } from "../theme/colors";
+import { ModernCard } from "../components/modern/ModernCard";
+import { ModernButton } from "../components/modern/ModernButton";
+import { GlassInput } from "../components/modern/GlassInput";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function HomeScreen() {
-  const { 
-    currentState, 
-    isMinimized, 
-    setMinimized, 
+  const {
+    currentState,
+    isMinimized,
+    setMinimized,
     setVoiceState,
     chatMessages,
     addChatMessage,
     selectedVoice,
     setSelectedVoice,
-    availableVoices
+    availableVoices,
   } = useVoiceStore();
 
   const [isChatMode, setIsChatMode] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [showVoiceModal, setShowVoiceModal] = useState(false);
-
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Auto-scroll chat to bottom
@@ -53,333 +55,322 @@ export default function HomeScreen() {
     }
   }, [chatMessages, isChatMode]);
 
-  const handleCentralCorePress = () => {
-    if (currentState === "dormido") {
-      jupyterVoice.startListening();
-    } else if (currentState === "escuchando") {
-      jupyterVoice.stopListening();
-      setVoiceState("dormido");
-    } else if (currentState === "hablando" || currentState === "pensando") {
-      jupyterVoice.triggerBargeIn();
-    } else {
-      setVoiceState("dormido");
+  const handleStartListening = async () => {
+    try {
+      setVoiceState("escuchando");
+      const isListening = await jupyterVoice.startListening();
+      if (!isListening) {
+        setVoiceState("background");
+      }
+    } catch (error) {
+      console.error("[HomeScreen] Error starting voice:", error);
+      setVoiceState("error");
     }
   };
 
-  const handleSendChat = () => {
-    if (!chatInput.trim()) return;
-    const textToSend = chatInput;
-    setChatInput("");
-    jupyterVoice.handleUserText(textToSend);
+  const handleStopListening = async () => {
+    try {
+      setVoiceState("background");
+      await jupyterVoice.stopListening();
+    } catch (error) {
+      console.error("[HomeScreen] Error stopping voice:", error);
+      setVoiceState("error");
+    }
   };
 
-  const handleTestVoice = (voiceId: string) => {
-    setSelectedVoice(voiceId);
-    Speech.stop();
-    Speech.speak("Voz de Jupyter seleccionada.", {
-      language: "es",
-      voice: voiceId,
-      pitch: 1.0,
-      rate: 1.0,
-    });
+  const handleSendChat = async () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = chatInput;
+    setChatInput("");
+    addChatMessage("user", userMessage);
+
+    try {
+      setVoiceState("pensando");
+      // Simulate AI response
+      setTimeout(() => {
+        addChatMessage("assistant", `Entiendo tu mensaje: "${userMessage}"`);
+        setVoiceState("background");
+      }, 1000);
+    } catch (error) {
+      console.error("[HomeScreen] Chat error:", error);
+      setVoiceState("error");
+    }
   };
 
   const getCoreGlowColor = () => {
     switch (currentState) {
       case "escuchando":
-        return COLORS.cyan; // Azul moderno (Primary)
+        return COLORS.primary;
       case "pensando":
-        return COLORS.purple; // Púrpura pensativo
+        return COLORS.purple;
       case "hablando":
-        return COLORS.cyan; // Azul hablando
+        return COLORS.primary;
       case "accion":
       case "ejecutando":
-        return COLORS.orange; // Naranja para acciones activas
+        return COLORS.accent;
       case "investigando":
-        return COLORS.green; // Verde para investigación
+        return COLORS.secondary;
       case "analizando":
-        return COLORS.cyan; // Azul para análisis
+        return COLORS.primary;
       case "background":
-        return COLORS.indigo; // Indigo de fondo
+        return COLORS.blue;
       case "offline":
-        return COLORS.textMuted; // Gris mutado offline
+        return COLORS.textMuted;
       case "error":
-        return COLORS.red; // Rojo error limpio
+        return COLORS.red;
       default:
-        return COLORS.cardBg; // Gris oscuro por defecto
+        return COLORS.blue;
     }
   };
 
-  const renderMinimizedContent = () => (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={() => setMinimized(false)}
-      style={styles.minimizedTouch as any}
-    >
-      <View style={styles.minimizedOuter as any}>
-        <View 
-          style={[styles.minimizedInner, { backgroundColor: getCoreGlowColor() }] as any} 
+  if (isMinimized) {
+    return (
+      <View style={styles.minimizedContainer}>
+        <TouchableOpacity
+          style={[styles.minimizedBall, { backgroundColor: getCoreGlowColor() }]}
+          onPress={() => setMinimized(false)}
+          activeOpacity={0.8}
+        >
+          <VoiceStateIndicator state={currentState} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Chat Mode UI
+  if (isChatMode) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+
+        <View style={styles.chatHeader}>
+          <TouchableOpacity
+            onPress={() => setIsChatMode(false)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.chatHeaderBack}>← Volver</Text>
+          </TouchableOpacity>
+          <Text style={styles.chatHeaderTitle}>Chat con IA</Text>
+          <View style={{ width: 60 }} />
+        </View>
+
+        <ScrollView
+          ref={scrollViewRef}
+          style={styles.chatMessages}
+          contentContainerStyle={styles.chatContent}
+        >
+          {chatMessages.length === 0 ? (
+            <View style={styles.chatEmpty}>
+              <Text style={styles.chatEmptyText}>
+                Inicia una conversación
+              </Text>
+            </View>
+          ) : (
+            chatMessages.map((msg, idx) => (
+              <View
+                key={idx}
+                style={[
+                  styles.messageBubble,
+                  msg.sender === "user" && styles.userBubble,
+                  msg.sender === "assistant" && styles.assistantBubble,
+                ]}
+              >
+                <Text style={styles.messageText}>{msg.message}</Text>
+              </View>
+            ))
+          )}
+        </ScrollView>
+
+        <View style={styles.chatInputContainer}>
+          <GlassInput
+            placeholder="Escribe tu mensaje..."
+            value={chatInput}
+            onChangeText={setChatInput}
+            style={{ flex: 1 }}
+          />
+          <ModernButton
+            title="Enviar"
+            onPress={handleSendChat}
+            size="small"
+            style={{ marginLeft: 8 }}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Main Voice Mode UI
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hola, Asistente</Text>
+          <Text style={styles.subtitle}>¿En qué puedo ayudarte?</Text>
+        </View>
+
+        {/* Main Orb - Voice Visualizer */}
+        <View style={styles.orbContainer}>
+          <FloatingContainer>
+            <View style={styles.orbWrapper}>
+              {currentState === "escuchando" && (
+                <Canvas style={styles.canvas}>
+                  <Circle
+                    cx={SCREEN_WIDTH / 2}
+                    cy={120}
+                    r={60}
+                    color={getCoreGlowColor()}
+                  >
+                    <RadialGradient
+                      c={vec(SCREEN_WIDTH / 2, 120)}
+                      r={60}
+                      colors={[getCoreGlowColor(), `${getCoreGlowColor()}00`]}
+                    />
+                  </Circle>
+                </Canvas>
+              )}
+              <View style={styles.orbInner}>
+                <VoiceStateIndicator state={currentState} size="large" />
+              </View>
+              <AudioWaveform isActive={currentState === "escuchando"} />
+            </View>
+          </FloatingContainer>
+        </View>
+
+        {/* Quick Info Cards */}
+        <View style={styles.infoGrid}>
+          <ModernCard glassy elevated style={styles.infoCard}>
+            <Text style={styles.infoLabel}>Estado</Text>
+            <Text style={styles.infoValue}>{currentState}</Text>
+          </ModernCard>
+          <ModernCard glassy elevated style={styles.infoCard}>
+            <Text style={styles.infoLabel}>Voz</Text>
+            <Text style={styles.infoValue}>
+              {selectedVoice?.name || "Sistema"}
+            </Text>
+          </ModernCard>
+        </View>
+
+        {/* Upcoming Calendar */}
+        <ModernCard glassy elevated style={styles.calendarCard}>
+          <Text style={styles.cardTitle}>Próximos Eventos</Text>
+          <View style={styles.eventPlaceholder}>
+            <Text style={styles.eventPlaceholderText}>
+              Conecta tu Google Calendar
+            </Text>
+          </View>
+        </ModernCard>
+
+        {/* Quick Actions */}
+        <Text style={styles.sectionTitle}>Acciones Rápidas</Text>
+        <View style={styles.actionsGrid}>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
+            <Text style={styles.actionIcon}>🎤</Text>
+            <Text style={styles.actionLabel}>Grabar Nota</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
+            <Text style={styles.actionIcon}>📅</Text>
+            <Text style={styles.actionLabel}>Crear Evento</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
+            <Text style={styles.actionIcon}>✅</Text>
+            <Text style={styles.actionLabel}>Nueva Tarea</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
+            <Text style={styles.actionIcon}>⚙️</Text>
+            <Text style={styles.actionLabel}>Configurar</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* Main Control Dock */}
+      <View style={styles.dock}>
+        {/* Voice Toggle Button */}
+        <ModernButton
+          title={currentState === "escuchando" ? "Detener" : "Escuchar"}
+          onPress={
+            currentState === "escuchando"
+              ? handleStopListening
+              : handleStartListening
+          }
+          variant={currentState === "escuchando" ? "secondary" : "primary"}
+          size="large"
+          style={{ flex: 1 }}
+        />
+
+        {/* Chat Toggle Button */}
+        <ModernButton
+          title="Chat"
+          onPress={() => setIsChatMode(true)}
+          variant="outline"
+          size="large"
+          style={{ flex: 1, marginHorizontal: 8 }}
+        />
+
+        {/* Voice Selection Button */}
+        <ModernButton
+          title="🎵"
+          onPress={() => setShowVoiceModal(true)}
+          variant="ghost"
+          size="large"
+          style={{ flex: 0.8 }}
+        />
+
+        {/* Minimize Button */}
+        <ModernButton
+          title="−"
+          onPress={() => setMinimized(true)}
+          variant="ghost"
+          size="large"
+          style={{ flex: 0.8 }}
         />
       </View>
-    </TouchableOpacity>
-  );
 
-  return (
-    <View style={styles.container as any}>
-      <StatusBar barStyle="light-content" />
-
-      <FloatingContainer
-        isMinimized={isMinimized}
-        minimizedContent={renderMinimizedContent()}
-      >
-        <SafeAreaView style={styles.safeArea as any}>
-          {/* BACKGROUND GLOW SHADER (SKIA) */}
-          <View style={styles.backgroundGlow as any}>
-            <Canvas style={styles.canvas as any}>
-              <Circle cx={SCREEN_WIDTH / 2} cy={SCREEN_HEIGHT / 2 - 50} r={280}>
-                <RadialGradient
-                  c={vec(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 - 50)}
-                  r={280}
-                  colors={[getCoreGlowColor() + "25", getCoreGlowColor() + "05", "#00000000"]}
-                />
-              </Circle>
-            </Canvas>
-          </View>
-
-          {/* TOP HUD: System and Agent telemetry */}
-          <View style={styles.header as any}>
-            <View>
-              <Text style={styles.telemetryTitle as any}>
-                JUPYTER.OS CORE
-              </Text>
-              <Text style={styles.telemetryValue as any}>
-                ONLINE // MODEL: LLAMA-3.1
-              </Text>
-            </View>
-            
-            <View style={styles.headerRight as any}>
-              <TouchableOpacity 
-                style={styles.headerIconButton as any}
-                onPress={() => setShowVoiceModal(true)}
-              >
-                <Text style={styles.headerIconText as any}>⚙️</Text>
+      {/* Voice Selection Modal */}
+      <Modal visible={showVoiceModal} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecciona una voz</Text>
+              <TouchableOpacity onPress={() => setShowVoiceModal(false)}>
+                <Text style={styles.modalClose}>✕</Text>
               </TouchableOpacity>
-              
-              <View style={styles.badgeContainer as any}>
-                <View style={styles.badge as any}>
-                  <Text style={[styles.badgeText, { color: getCoreGlowColor() }] as any}>
-                    {currentState.toUpperCase()}
-                  </Text>
-                </View>
-              </View>
             </View>
-          </View>
 
-          {/* CHAT MODE OR ORB MODE CONTAINER */}
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={styles.centerContainer as any}
-          >
-            {isChatMode ? (
-              // --- CHAT INTERFACE ---
-              <View style={styles.chatWrapper as any}>
-                {/* Mini status indicator at top of chat */}
-                <View style={styles.chatStatusHeader as any}>
-                  <View style={[styles.statusDot, { backgroundColor: getCoreGlowColor() }] as any} />
-                  <Text style={styles.statusText as any}>Jupyter está disponible por texto</Text>
-                </View>
-
-                <ScrollView
-                  ref={scrollViewRef}
-                  style={styles.chatScroll as any}
-                  contentContainerStyle={styles.chatScrollContent as any}
+            <FlatList
+              data={availableVoices}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.voiceItem,
+                    selectedVoice?.id === item.id && styles.voiceItemSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedVoice(item);
+                    setShowVoiceModal(false);
+                  }}
                 >
-                  {chatMessages.map((msg) => {
-                    const isUser = msg.role === "user";
-                    return (
-                      <View 
-                        key={msg.id} 
-                        style={[
-                          styles.messageRow, 
-                          isUser ? styles.messageRowUser : styles.messageRowAssistant
-                        ] as any}
-                      >
-                        {!isUser && <Text style={styles.avatarSymbol as any}>🤖</Text>}
-                        <View 
-                          style={[
-                            styles.messageBubble,
-                            isUser ? styles.bubbleUser : styles.bubbleAssistant,
-                            !isUser && { borderColor: getCoreGlowColor() + "30" }
-                          ] as any}
-                        >
-                          <Text style={isUser ? styles.messageTextUser : styles.messageTextAssistant as any}>
-                            {msg.content}
-                          </Text>
-                          <Text style={styles.messageTime as any}>{msg.timestamp}</Text>
-                        </View>
-                        {isUser && <Text style={styles.avatarSymbol as any}>👤</Text>}
-                      </View>
-                    );
-                  })}
-                </ScrollView>
-
-                {/* Chat Input Bar */}
-                <View style={styles.inputContainer as any}>
-                  <TextInput
-                    style={styles.textInput as any}
-                    placeholder="Escribe un mensaje a Jupyter..."
-                    placeholderTextColor="#475569"
-                    value={chatInput}
-                    onChangeText={setChatInput}
-                    onSubmitEditing={handleSendChat}
-                  />
-                  <TouchableOpacity 
-                    onPress={handleSendChat} 
-                    style={[styles.sendButton, { backgroundColor: getCoreGlowColor() }] as any}
-                  >
-                    <Text style={styles.sendButtonText as any}>⚡</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              // --- STANDARD CORE ORB INTERFACE ---
-              <View style={styles.orbWrapper as any}>
-                <View style={styles.coreContainer as any}>
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={handleCentralCorePress}
-                    style={styles.coreTouch as any}
-                  >
-                    {/* Outer pulsing ring */}
-                    <View 
-                      style={[
-                        styles.coreOuterRing,
-                        {
-                          shadowColor: getCoreGlowColor(),
-                          borderColor: getCoreGlowColor() + "40",
-                        }
-                      ] as any}
-                    >
-                      {/* Core status orb */}
-                      <View 
-                        style={[
-                          styles.coreInnerOrb,
-                          {
-                            backgroundColor: getCoreGlowColor(),
-                            shadowColor: getCoreGlowColor(),
-                          }
-                        ] as any}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Realtime Waveform Visualization */}
-                <AudioWaveform state={currentState} />
-
-                {/* Current Voice State Text Indicators */}
-                <VoiceStateIndicator state={currentState} />
-              </View>
-            )}
-          </KeyboardAvoidingView>
-
-          {/* LOWER CONTROLS & DOCK */}
-          <View style={styles.footer as any}>
-            <View style={styles.buttonContainer as any}>
-              <TouchableOpacity
-                onPress={() => setIsChatMode(!isChatMode)}
-                style={[styles.dockButton, isChatMode && styles.dockActiveButton] as any}
-              >
-                <Text style={styles.dockButtonIcon as any}>{isChatMode ? "🎙️" : "⌨️"}</Text>
-                <Text style={styles.dockButtonText as any}>{isChatMode ? "Modo Voz" : "Modo Chat"}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => setMinimized(true)}
-                style={styles.dockButton as any}
-              >
-                <Text style={styles.dockButtonIcon as any}>📉</Text>
-                <Text style={styles.dockButtonText as any}>Minimizar</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  Speech.stop();
-                  jupyterVoice.stopListening();
-                  setVoiceState("dormido");
-                }}
-                style={styles.dockStopButton as any}
-              >
-                <Text style={styles.dockButtonIcon as any}>🛑</Text>
-                <Text style={styles.dockStopButtonText as any}>Detener</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* VOICE SELECTION MODAL */}
-          <Modal
-            visible={showVoiceModal}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={() => setShowVoiceModal(false)}
-          >
-            <View style={styles.modalOverlay as any}>
-              <View style={styles.modalContent as any}>
-                <View style={styles.modalHeader as any}>
-                  <Text style={styles.modalTitle as any}>Configurar Voz del Sistema</Text>
-                  <TouchableOpacity 
-                    onPress={() => setShowVoiceModal(false)}
-                    style={styles.modalCloseButton as any}
-                  >
-                    <Text style={styles.modalCloseText as any}>✕</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <Text style={styles.modalSub as any}>
-                  Selecciona una voz en español detectada en tu dispositivo para la síntesis de voz (TTS).
-                </Text>
-
-                {availableVoices.length === 0 ? (
-                  <View style={styles.emptyContainer as any}>
-                    <Text style={styles.emptyText as any}>No se detectaron voces adicionales instaladas en español.</Text>
-                    <Text style={styles.emptySubtext as any}>El sistema utilizará la voz predeterminada del dispositivo.</Text>
+                  <View>
+                    <Text style={styles.voiceName}>{item.name}</Text>
+                    <Text style={styles.voiceLang}>{item.language}</Text>
                   </View>
-                ) : (
-                  <FlatList
-                    data={availableVoices}
-                    keyExtractor={(item) => item.identifier}
-                    contentContainerStyle={styles.voiceList as any}
-                    renderItem={({ item }) => {
-                      const isSelected = selectedVoice === item.identifier;
-                      return (
-                        <TouchableOpacity
-                          onPress={() => handleTestVoice(item.identifier)}
-                          style={[
-                            styles.voiceItem,
-                            isSelected && styles.voiceItemSelected
-                          ] as any}
-                        >
-                          <View style={styles.voiceInfo as any}>
-                            <Text style={[styles.voiceName, isSelected && styles.voiceTextSelected] as any}>
-                              {item.name}
-                            </Text>
-                            <Text style={styles.voiceLang as any}>
-                              Idioma: {item.language} / Calidad: {item.quality || "Estándar"}
-                            </Text>
-                          </View>
-                          {isSelected && <Text style={styles.checkIcon as any}>⭐</Text>}
-                        </TouchableOpacity>
-                      );
-                    }}
-                  />
-                )}
-              </View>
-            </View>
-          </Modal>
-
-        </SafeAreaView>
-      </FloatingContainer>
-    </View>
+                  {selectedVoice?.id === item.id && (
+                    <Text style={styles.voiceCheck}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 }
 
@@ -388,410 +379,307 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  safeArea: {
+  scrollView: {
     flex: 1,
-    justifyContent: "space-between",
   },
-  backgroundGlow: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: -10,
+  scrollContent: {
+    paddingBottom: 120,
   },
-  canvas: {
-    width: "100%",
-    height: "100%",
-  },
+
+  // Header
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
   },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  headerIconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.cardBg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerIconText: {
-    fontSize: 16,
-  },
-  telemetryTitle: {
-    fontSize: 9,
-    letterSpacing: 2,
-    fontWeight: "700",
-    color: COLORS.textMuted,
-  },
-  telemetryValue: {
-    fontSize: 11,
-    fontFamily: "monospace",
+  greeting: {
+    fontSize: 28,
+    fontWeight: "800",
     color: COLORS.text,
-    marginTop: 2,
+    marginBottom: 4,
   },
-  badgeContainer: {
-    flexDirection: "row",
+  subtitle: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: "500",
   },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderWidth: 1,
-  },
-  badgeText: {
-    fontSize: 8,
-    fontFamily: "monospace",
-    fontWeight: "600",
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: "center",
+
+  // Orb Container
+  orbContainer: {
+    alignItems: "center",
+    marginVertical: 24,
+    height: 300,
   },
   orbWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+    width: 200,
+    height: 200,
   },
-  coreContainer: {
+  orbInner: {
+    position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 20,
+    width: 140,
+    height: 140,
   },
-  coreTouch: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  coreOuterRing: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    backgroundColor: "rgba(28, 27, 28, 0.4)",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.6,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  coreInnerOrb: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 15,
-    elevation: 8,
+  canvas: {
+    width: SCREEN_WIDTH,
+    height: 200,
   },
 
-  // CHAT STYLE CLASSES
-  chatWrapper: {
-    flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-  },
-  chatStatusHeader: {
+  // Info Grid
+  infoGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 6,
-    alignSelf: "center",
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  statusText: {
-    fontSize: 10,
-    fontFamily: "monospace",
-    color: COLORS.textMuted,
-  },
-  chatScroll: {
-    flex: 1,
-    marginVertical: 8,
-  },
-  chatScrollContent: {
-    paddingBottom: 16,
     gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
-  messageRow: {
+  infoCard: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoValue: {
+    fontSize: 16,
+    color: COLORS.primary,
+    fontWeight: "700",
+    marginTop: 8,
+    textTransform: "capitalize",
+  },
+
+  // Calendar Card
+  calendarCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 12,
+  },
+  eventPlaceholder: {
+    paddingVertical: 20,
+    alignItems: "center",
+    borderRadius: 12,
+    backgroundColor: COLORS.glassLight,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+    borderStyle: "dashed",
+  },
+  eventPlaceholderText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontWeight: "500",
+  },
+
+  // Section Title
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+    paddingHorizontal: 20,
+    marginBottom: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+
+  // Actions Grid
+  actionsGrid: {
     flexDirection: "row",
-    alignItems: "flex-end",
+    flexWrap: "wrap",
+    gap: 12,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  actionCard: {
+    width: (SCREEN_WIDTH - 52) / 2,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: COLORS.cardBg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: "center",
     gap: 8,
-    marginVertical: 4,
-    maxWidth: "85%",
   },
-  messageRowUser: {
-    alignSelf: "flex-end",
+  actionIcon: {
+    fontSize: 24,
   },
-  messageRowAssistant: {
-    alignSelf: "flex-start",
+  actionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: COLORS.text,
+    textAlign: "center",
   },
-  avatarSymbol: {
-    fontSize: 18,
-    marginBottom: 4,
+
+  // Dock
+  dock: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    paddingBottom: 16,
+    backgroundColor: COLORS.backgroundSecondary,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    gap: 8,
+  },
+
+  // Chat Mode
+  chatHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  chatHeaderBack: {
+    fontSize: 14,
+    color: COLORS.primary,
+    fontWeight: "600",
+  },
+  chatHeaderTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  chatMessages: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  chatContent: {
+    paddingVertical: 16,
+    gap: 8,
+  },
+  chatEmpty: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  chatEmptyText: {
+    fontSize: 14,
+    color: COLORS.textMuted,
+    fontWeight: "500",
   },
   messageBubble: {
+    maxWidth: "85%",
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 14,
   },
-  bubbleUser: {
-    backgroundColor: "rgba(0, 229, 255, 0.15)", // Azure Nexus primary tinted glow
-    borderColor: COLORS.cyan,
-    borderBottomRightRadius: 2,
-  },
-  bubbleAssistant: {
-    backgroundColor: COLORS.cardBg,
-    borderColor: COLORS.border,
-    borderBottomLeftRadius: 2,
-  },
-  messageTextUser: {
-    color: COLORS.text,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  messageTextAssistant: {
-    color: COLORS.text,
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "300",
-  },
-  messageTime: {
-    fontSize: 8,
-    color: COLORS.textMuted,
+  userBubble: {
     alignSelf: "flex-end",
-    marginTop: 4,
-    fontFamily: "monospace",
+    backgroundColor: COLORS.primary,
   },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+  assistantBubble: {
+    alignSelf: "flex-start",
     backgroundColor: COLORS.cardBg,
-    borderRadius: 24,
     borderWidth: 1,
     borderColor: COLORS.border,
-    paddingLeft: 16,
-    paddingRight: 6,
-    paddingVertical: 6,
-    marginBottom: 8,
   },
-  textInput: {
-    flex: 1,
-    color: "#E2E8F0",
-    fontSize: 13,
-    paddingVertical: 4,
-  },
-  sendButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sendButtonText: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "#FFFFFF",
-  },
-
-  // FOOTER STYLE CLASSES
-  footer: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    paddingTop: 10,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  dockButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.cardBg,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: 6,
-  },
-  dockActiveButton: {
-    borderColor: COLORS.cyan,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-  },
-  dockButtonIcon: {
+  messageText: {
     fontSize: 14,
+    color: COLORS.text,
+    fontWeight: "500",
   },
-  dockButtonText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#CBD5E1",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  dockStopButton: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(239, 68, 68, 0.3)",
-    backgroundColor: "rgba(239, 68, 68, 0.1)",
-    alignItems: "center",
-    justifyContent: "center",
+  chatInputContainer: {
     flexDirection: "row",
-    gap: 6,
-  },
-  dockStopButtonText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: COLORS.red,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 20,
+    gap: 8,
   },
 
-  // MODAL STYLE CLASSES
+  // Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.8)",
+    backgroundColor: "rgba(10, 14, 39, 0.8)",
     justifyContent: "flex-end",
   },
   modalContent: {
     backgroundColor: COLORS.cardBg,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    paddingTop: 20,
     maxHeight: "75%",
-    padding: 24,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
   modalTitle: {
     fontSize: 16,
     fontWeight: "700",
     color: COLORS.text,
   },
-  modalCloseButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalCloseText: {
+  modalClose: {
+    fontSize: 20,
     color: COLORS.textMuted,
-    fontSize: 12,
-  },
-  modalSub: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-    lineHeight: 15,
-    marginBottom: 16,
-  },
-  voiceList: {
-    gap: 10,
-    paddingBottom: 24,
+    fontWeight: "600",
   },
   voiceItem: {
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: COLORS.background,
-    borderWidth: 1,
-    borderColor: COLORS.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
   },
   voiceItemSelected: {
-    borderColor: COLORS.cyan,
-    backgroundColor: "rgba(59, 130, 246, 0.1)",
-  },
-  voiceInfo: {
-    flex: 1,
+    backgroundColor: COLORS.glassLight,
   },
   voiceName: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 14,
+    fontWeight: "600",
     color: COLORS.text,
   },
-  voiceTextSelected: {
-    color: COLORS.cyan,
-    fontWeight: "600",
-  },
   voiceLang: {
-    fontSize: 9,
+    fontSize: 11,
     color: COLORS.textMuted,
-    marginTop: 2,
-    fontFamily: "monospace",
+    marginTop: 4,
   },
-  checkIcon: {
-    fontSize: 14,
+  voiceCheck: {
+    fontSize: 16,
+    color: COLORS.primary,
+    fontWeight: "700",
   },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 40,
-    gap: 4,
+
+  // Minimized
+  minimizedContainer: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    paddingRight: 16,
+    paddingBottom: 32,
   },
-  emptyText: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    textAlign: "center",
-    fontWeight: "500",
-  },
-  emptySubtext: {
-    fontSize: 10,
-    color: COLORS.textMuted,
-    textAlign: "center",
-  },
-  minimizedTouch: {
-    width: "100%",
-    height: "100%",
+  minimizedBall: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 9999,
-    backgroundColor: "#020617",
-  },
-  minimizedOuter: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(139, 92, 246, 0.5)",
-    backgroundColor: "rgba(76, 29, 149, 0.2)",
-  },
-  minimizedInner: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
 });
