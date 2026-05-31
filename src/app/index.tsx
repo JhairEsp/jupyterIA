@@ -14,7 +14,6 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
 import * as Speech from "expo-speech";
 import { useVoiceStore } from "../store/voiceStore";
 import { AudioWaveform } from "../components/AudioWaveform";
@@ -25,6 +24,7 @@ import { COLORS } from "../theme/colors";
 import { ModernCard } from "../components/modern/ModernCard";
 import { ModernButton } from "../components/modern/ModernButton";
 import { GlassInput } from "../components/modern/GlassInput";
+import { GeminiOrb } from "../components/modern/GeminiOrb";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -215,32 +215,19 @@ export default function HomeScreen() {
           <Text style={styles.subtitle}>¿En qué puedo ayudarte?</Text>
         </View>
 
-        {/* Main Orb - Voice Visualizer */}
+        {/* Main Orb - Gemini Style */}
         <View style={styles.orbContainer}>
-          <FloatingContainer>
-            <View style={styles.orbWrapper}>
-              {currentState === "escuchando" && (
-                <Canvas style={styles.canvas}>
-                  <Circle
-                    cx={SCREEN_WIDTH / 2}
-                    cy={120}
-                    r={60}
-                    color={getCoreGlowColor()}
-                  >
-                    <RadialGradient
-                      c={vec(SCREEN_WIDTH / 2, 120)}
-                      r={60}
-                      colors={[getCoreGlowColor(), `${getCoreGlowColor()}00`]}
-                    />
-                  </Circle>
-                </Canvas>
-              )}
-              <View style={styles.orbInner}>
-                <VoiceStateIndicator state={currentState} size="large" />
-              </View>
-              <AudioWaveform isActive={currentState === "escuchando"} />
-            </View>
-          </FloatingContainer>
+          <GeminiOrb 
+            isActive={currentState === "escuchando"} 
+            color={getCoreGlowColor()}
+            size="large"
+          />
+          <View style={styles.stateIndicator}>
+            <VoiceStateIndicator state={currentState} size="large" />
+          </View>
+          {currentState === "escuchando" && (
+            <AudioWaveform isActive={true} />
+          )}
         </View>
 
         {/* Quick Info Cards */}
@@ -406,25 +393,14 @@ const styles = StyleSheet.create({
   // Orb Container
   orbContainer: {
     alignItems: "center",
-    marginVertical: 24,
-    height: 300,
-  },
-  orbWrapper: {
-    alignItems: "center",
     justifyContent: "center",
-    width: 200,
-    height: 200,
+    marginVertical: 32,
+    paddingVertical: 20,
   },
-  orbInner: {
+  stateIndicator: {
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    width: 140,
-    height: 140,
-  },
-  canvas: {
-    width: SCREEN_WIDTH,
-    height: 200,
   },
 
   // Info Grid
